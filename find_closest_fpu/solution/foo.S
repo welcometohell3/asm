@@ -18,18 +18,15 @@ main:
     push rbp
     mov rbp, rsp
     sub rsp, 32                  
-    
-    # Read array size
-    lea rdi, format_int[rip]
+
+    lea rdi, format_int[rip] # размер массива
     lea rsi, size[rip]
     xor eax, eax
     call scanf
     
-    # Validate size > 0
     mov rcx, [size]
     cmp rcx, 0
     jle invalid_size
-    
     
     mov rax, rcx
     shl rax, 3                   
@@ -39,7 +36,6 @@ main:
     jz allocation_failed
     mov [array_ptr], rax         
     
-    # Read array elements
     mov rbx, 0                   
     mov r12, [array_ptr]         
 input_loop:
@@ -53,13 +49,11 @@ input_loop:
     cmp rbx, [size]
     jl input_loop
     
-    # Read target number
-    lea rdi, format_input[rip]
+    lea rdi, format_input[rip] # число
     lea rsi, target[rip]
     xor eax, eax
     call scanf
     
-    # Find closest number
     finit
     fld QWORD PTR target[rip]    
     mov rbx, [array_ptr]         
@@ -89,8 +83,7 @@ next_element:
     dec rcx
     jnz find_closest             
     
-    # Print result
-    fld QWORD PTR closest[rip]
+    fld QWORD PTR closest[rip] # вывод
     sub rsp, 8
     fstp QWORD PTR [rsp]
     movq xmm0, QWORD PTR [rsp]

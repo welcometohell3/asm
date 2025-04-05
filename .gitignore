@@ -1,3 +1,4 @@
 *.o
 foo
 task.elf
+/find_closest_avx
