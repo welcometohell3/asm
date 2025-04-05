@@ -1,1 +1,3 @@
 *.o
+foo
+task.elf
