@@ -3,13 +3,13 @@ AS = as
 
 CFLAGS = -g -no-pie
 
-all: foo
+all: solution
 
-foo: foo.o
-	$(CC) $(CFLAGS) -o foo foo.o
+solution: solution.o
+	$(CC) $(CFLAGS) -o solution solution.o
 
-foo.o: foo.S
-	$(AS) $(CFLAGS) -c -o foo.o foo.S
+solution.o: solution.S
+	$(AS) $(CFLAGS) -c -o solution.o solution.S
 	
 clean:
-	rm -f foo foo.o
+	rm -f solution solution.o
