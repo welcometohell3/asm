@@ -1,0 +1,68 @@
+.intel_syntax noprefix
+.extern readi64, writei64, nl, finish
+
+.data
+    array: .skip 800   
+    x:     .quad 0
+
+.text
+.global main
+
+main:
+    call readi64
+    jc error
+    mov r12, rax       
+    cmp r12, 1
+    jl error
+    cmp r12, 100
+    jg error
+    lea rbx, array[rip]
+    xor r13, r13    
+
+read_loop:
+    cmp r13, r12
+    jge process
+    call readi64
+    jc error
+    mov [rbx], rax
+    add rbx, 8
+    inc r13
+    jmp read_loop
+
+process:
+    lea rbx, array[rip]
+    xor r13, r13       
+    xor r15, r15       
+    mov r14, [x]   
+
+compare_loop:
+    cmp r13, r12
+    jge print_result
+    mov rax, [rbx]
+    cmp rax, r14       
+    j{{ op_asm }} valid  
+    jmp next
+
+valid:
+    inc r15            
+    mov rdi, rax       
+    call writei64
+    call nl
+
+next:
+    add rbx, 8
+    inc r13
+    jmp compare_loop
+
+print_result:
+    mov rdi, r15
+    call writei64
+    call nl
+    xor eax, eax
+    jmp exit
+
+error:
+    mov eax, 1
+
+exit:
+    ret

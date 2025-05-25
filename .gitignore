@@ -2,6 +2,4 @@
 foo
 task.elf
 /find_closest_avx
-*.ans
-*.dat
-*.xml
+*/variants
