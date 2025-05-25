@@ -85,13 +85,14 @@ readi64:
         .align  16
         .global writei64
 writei64:
-        push    %rbp
-        mov     %rsp, %rbp
-        mov     %rdi, %rsi
-        xor     %eax, %eax
-        lea     .L6(%rip), %rdi
-        call    printf
-        pop     %rbp
+        push %rbp
+        mov %rsp, %rbp
+        sub $8, %rsp       
+        mov %rdi, %rsi     
+        lea .L6(%rip), %rdi 
+        xor %eax, %eax     
+        call printf
+        leave              
         ret
         .section        .string, "aMS", @progbits, 1
 .L6:    .asciz  "%lld"

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<problem
+  package="ru.ejudge.auto_var{{ id }}"
+  id="{{ id }}"
+  type="standard">
+  <keywords>условные переходы</keywords>
+  <statement language="ru_RU">
+    <title>Проверка условия (Вариант {{ id }})</title>
+    <description><p>Напишите программу на ассемблере x86-64, которая проверяет, удовлетворяет ли введённое число X условию: {{ desc }}.</p>
+    <p>Выведите 1, если условие истинно, и 0 иначе.</p></description>
+    <input_format><p>Одно 64-битное целое число X.</p></input_format>
+    <output_format><p>0 или 1 в зависимости от выполнения условия.</p></output_format>
+    <notes><p>Используйте сравнения и условные переходы.</p></notes>
+  </statement>
+  <examples>
+    <example>
+      <input>{{ value - 1 }}</input>
+      <output>{% if op == '>' or op == '>=' or op == '!=' %}0{% else %}1{% endif %}</output>
+    </example>
+    <example>
+      <input>{{ value + 1 }}</input>
+      <output>{% if op == '<' or op == '<=' or op == '!=' %}0{% else %}1{% endif %}</output>
+    </example>
+  </examples>
+  <review_notes></review_notes>
+  <review_comments></review_comments>
+</problem>

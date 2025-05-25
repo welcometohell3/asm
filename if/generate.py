@@ -8,68 +8,60 @@ from jinja2 import Environment, FileSystemLoader
 
 # Конфигурация вариантов
 VARIANTS = [
-    {"id": "A", "op": ">", "desc": " &gt; 0"},
-    {"id": "B", "op": "<", "desc": " &lt; 0"},
-    {"id": "C", "op": "==", "desc": " == 0"},
-    {"id": "D", "op": ">=", "desc": " &gt;= 0"},
-    {"id": "E", "op": "!=", "desc": " != 0"}
+    {"id": "A", "op": ">",  "value": 10, "desc": " &gt; 10"},
+    {"id": "B", "op": "<",  "value": 3,  "desc": " &lt; 3"},
+    {"id": "C", "op": "==", "value": 7,  "desc": " == 7"},
+    {"id": "D", "op": ">=", "value": 5,  "desc": " &gt;= 5"},
+    {"id": "E", "op": "!=", "value": 0,  "desc": " != 0"}
 ]
 
 # Маппинг операторов на ассемблерные мнемоники
 OP_MAP = {
-    ">": "g",
-    "<": "l",
-    "==": "e",
-    ">=": "ge",
-    "<=": "le",
-    "!=": "ne"
+    ">": "jg",
+    "<": "jl",
+    "==": "je",
+    ">=": "jge",
+    "<=": "jle",
+    "!=": "jne"
 }
 
 # Инициализация Jinja2
 env = Environment(loader=FileSystemLoader("templates"))
 
-def generate_test_data(op, n=5):
+def generate_test_data(op, value, n=5):
     """Генерирует тестовые данные и ожидаемый результат"""
-    arr = [random.randint(-20, 20) for _ in range(n)]
-    filtered = []
-    for num in arr:
-        if op == ">" and num > 0: filtered.append(num)
-        elif op == "<" and num < 0: filtered.append(num)
-        elif op == "==" and num == 0: filtered.append(num)
-        elif op == ">=" and num >= 0: filtered.append(num)
-        elif op == "!=" and num != 0: filtered.append(num)
-    return arr, filtered
-
-def generate_example_output(op, arr):
-    """Генерирует output для примера в statement.xml"""
-    filtered = []
-    for num in arr:
-        if op == ">" and num > 0: filtered.append(num)
-        elif op == "<" and num < 0: filtered.append(num)
-        elif op == "==" and num == 0: filtered.append(num)
-        elif op == ">=" and num >= 0: filtered.append(num)
-        elif op == "!=" and num != 0: filtered.append(num)
-    return "\n".join(map(str, filtered)) + f"\n{len(filtered)}"
+    test_cases = [
+        value - 1, value, value + 1,
+        random.randint(-20, 20),
+        0 if value != 0 else 1
+    ]
+    results = []
+    for num in test_cases:
+        if op == ">" and num > value: results.append(1)
+        elif op == "<" and num < value: results.append(1)
+        elif op == "==" and num == value: results.append(1)
+        elif op == ">=" and num >= value: results.append(1)
+        elif op == "!=" and num != value: results.append(1)
+        else: results.append(0)
+    return test_cases, results
 
 def generate_variant(variant):
     variant_dir = f"variants/{variant['id']}"
     solution_dir = f"{variant_dir}/solution"
     os.makedirs(solution_dir, exist_ok=True)
     
-    # Фиксированные тестовые данные для примера в statement.xml
-    example_arr = [1, -2, 0, 15, -5]
-    example_output = generate_example_output(variant["op"], example_arr)
-    
     # Контекст для шаблонов
     context = {
         "id": variant["id"],
         "op": variant["op"],
         "op_asm": OP_MAP[variant["op"]],
+        "value": variant["value"],
         "desc": variant["desc"],
-        "example_output": example_output
+        "example_input": variant["value"] - 1,  # Для примера в statement.xml
+        "example_output": 0 if variant["op"] in [">", ">="] else 1
     }
     
-    # 1. Копируем библиотеку
+    # 1. Копируем библиотеку (если нужна)
     shutil.copy2("lib/simpleio.S", solution_dir)
     
     # 2. Генерируем solution.S
@@ -86,31 +78,25 @@ def generate_variant(variant):
     statement = env.get_template("statement.xml.j2")
     with open(f"{variant_dir}/statement.xml", "w") as f:
         f.write(statement.render(**context))
-
-    for template in ["solution.S.j2", "Makefile.j2", "statement.xml.j2"]:
-        with open(f"{variant_dir}/{template[:-3]}", "w") as f:
-            f.write(env.get_template(template).render(**context))
     
     # 5. Генерируем тесты
     tests_dir = f"{variant_dir}/tests"
     os.makedirs(tests_dir, exist_ok=True)
     
-    for i in range(1, 6):
-        arr, res = generate_test_data(variant["op"])
-        
+    inputs, outputs = generate_test_data(variant["op"], variant["value"])
+    for i, (inp, out) in enumerate(zip(inputs, outputs), 1):
         with open(f"{tests_dir}/{i:03d}.dat", "w") as f:
-            f.write(f"{len(arr)}\n" + "\n".join(map(str, arr)))
-        
+            f.write(f"{inp}")
         with open(f"{tests_dir}/{i:03d}.ans", "w") as f:
-            f.write("\n".join(map(str, res)) + f"\n{len(res)}\n")
+            f.write(f"{out}")
 
+    # 6. Создаем архив solution.tar
     tar_path = os.path.join(variant_dir, "solution.tar")
     with tarfile.open(tar_path, "w") as tar:
         for root, dirs, files in os.walk(solution_dir):
             for file in files:
                 full_path = os.path.join(root, file)
-                rel_path = os.path.relpath(full_path, start=solution_dir)
-                arcname = os.path.join("solution", rel_path)
+                arcname = os.path.join("solution", os.path.basename(file))
                 tar.add(full_path, arcname=arcname)
 
 if __name__ == "__main__":

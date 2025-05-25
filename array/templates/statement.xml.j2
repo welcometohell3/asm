@@ -1,30 +1,27 @@
-<problem>
+<?xml version="1.0" encoding="utf-8" ?>
+<problem
+   package="ru.ejudge.auto_var{{ id }}"
+   id="{{ id }}"
+   type="standard">
+  <keywords>сравнение массива</keywords>
+  <statement language="ru_RU">
     <title>Сравнение элементов массива (Вариант {{ id }})</title>
-    <description>
-        Напишите программу на ассемблере x86-64, которая находит все элементы массива{{ desc }}.
-        
-        Формат ввода:
-        - Число n (1 ≤ n ≤ 100) - размер массива
-        - n 64-битных целых чисел
-        
-        Формат вывода:
-        - Каждый подходящий элемент на отдельной строке
-        - В последней строке выведите количество найденных элементов
-    </description>
-    <examples>
-        <example>
-            <input>5\n1\n-2\n0\n15\n-5</input>
-            <output>
-            {% if op == '>' %}
-            1\n15\n2
-            {% elif op == '<' %}
-            -2\n-5\n2
-            {% endif %}
-            </output>
-        </example>
-    </examples>
-    <constraints>
-        <time>1 сек</time>
-        <memory>64 МБ</memory>
-    </constraints>
+    <description><p>Напишите программу на ассемблере x86-64, которая находит все элементы массива{{ desc }}.</p></description>
+    <input_format><p>Число n (1 ≤ n ≤ 100) - размер массива</p><p>n 64-битных целых чисел</p></input_format>
+    <output_format><p>Каждый подходящий элемент на отдельной строке</p><p>В последней строке выведите количество найденных элементов</p></output_format>
+    <notes><p>Программа должна обрабатывать ввод корректно.</p></notes>
+  </statement>
+  <examples>
+    <example>
+      <input>5
+1
+-2
+0
+15
+-5</input>
+      <output>{{ example_output }}</output>
+    </example>
+  </examples>
+  <review_notes></review_notes>
+  <review_comments></review_comments>
 </problem>

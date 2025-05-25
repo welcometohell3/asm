@@ -1,0 +1,24 @@
+.intel_syntax noprefix
+.global main
+
+.text
+main:
+    call readi64 
+    mov rdi, rax 
+    cmp rdi, {{ value }}
+    {{ op_asm }} true
+
+false:
+    mov rdi, 0 
+    call writei64
+    call nl
+    jmp exit
+
+true:
+    mov rdi, 1
+    call writei64
+    call nl
+
+exit:
+    xor rax, rax
+    ret
