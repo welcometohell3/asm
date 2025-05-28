@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <problem
-  package="ru.ejudge.auto_simd{{ id }}"
+  package="ru.ejudge.auto_var{{ id }}"
   id="{{ id }}"
   type="standard">
-  <keywords>SIMD, AVX</keywords>
+  <keywords>AVX, SIMD, операции с массивами, float</keywords>
   <statement language="ru_RU">
-    <title>SIMD операция (Вариант {{ id }})</title>
+    <title>Операция над массивами (Вариант {{ id }})</title>
     <description>
-      <p>Напишите программу на ассемблере x86-64 с использованием AVX, которая {{ desc }}.</p>
-      <p>Заданы три массива по 4 64-битных целых числа: <code>a</code>, <code>b</code> и <code>c</code>.</p>
-      <p>Проверьте, совпадает ли результат поэлементной операции <code>{{ op }}</code> над <code>a</code> и <code>b</code> с массивом <code>c</code>. Выведите <code>1</code>, если совпадает, иначе <code>0</code>.</p>
+      <p>Напишите программу на ассемблере x86-64 с использованием AVX, которая выполняет операцию <b>{{ desc }}</b> поэлементно над двумя массивами из 8 чисел с плавающей точкой.</p>
+      <p>Первый массив задан в программе, второй вводится с клавиатуры.</p>
+      <p>Выведите результат операции — массив из 8 чисел с плавающей точкой с точностью до одного знака после запятой.</p>
     </description>
     <input_format>
-      <p>Программа читает 12 чисел: сначала массив <code>a</code> (4 числа), затем <code>b</code> (4 числа), затем <code>c</code> (4 числа).</p>
+      <p>Вводятся 8 чисел с плавающей точкой через пробел.</p>
     </input_format>
     <output_format>
-      <p>Выводится одно число: <code>1</code> или <code>0</code>.</p>
+      <p>Выведите 8 чисел с плавающей точкой, разделённых пробелом, с точностью 1 знак после запятой.</p>
     </output_format>
     <notes>
-      <p>Используйте инструкции AVX: <code>vmovdqu</code>, <code>vpaddq</code>, <code>vpsubq</code>, <code>vpmullq</code>, <code>vpcmpeqq</code>, <code>vpmovmskb</code> и другие при необходимости.</p>
+      <p>Используйте AVX-инструкции для векторных операций.</p>
     </notes>
   </statement>
   <examples>
     <example>
-      <input></input>
-      <output></output>
+      <input>1 1 1 1 1 1 1 1</input>
+      <output>2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 </output>
+      <explanation>Если операция — сложение, то результат — сумма array1 и array2.</explanation>
     </example>
   </examples>
+  <review_notes></review_notes>
+  <review_comments></review_comments>
 </problem>

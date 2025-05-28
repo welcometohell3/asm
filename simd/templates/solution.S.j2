@@ -1,62 +1,75 @@
 .intel_syntax noprefix
-.global main
-
 .data
     .align 32
-a:  .zero 32
-b:  .zero 32
-c:  .zero 32
+    array1: .float 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0  
+    .align 32
+    array2: .space 32                                       
+    .align 32
+    result: .space 32
+    array_size: .quad 8
+    prompt: .asciz "Введите 8 чисел для array2 (через пробел): "
+    input_format: .asciz "%f"
+    output_format: .asciz "%.1f "
+    newline: .asciz "\n"
 
 .text
+.global main
+
 main:
     push rbp
     mov rbp, rsp
-    sub rsp, 32
 
-    lea rdi, a[rip]
-    call read_array
+    
+    lea rdi, [rip + prompt]  
+    call puts
 
-    lea rdi, b[rip]
-    call read_array
+    mov rbx, 0               
+    lea r12, [rip + array2]  
 
-    lea rdi, c[rip]
-    call read_array
+input_loop:
+    cmp rbx, [rip + array_size]
+    jge compute
 
-    vmovdqu ymm0, a[rip]
-    vmovdqu ymm1, b[rip]
+    lea rdi, [rip + input_format]  
+    lea rsi, [r12 + rbx * 4]       
+    xor eax, eax                   
+    call scanf
 
-    {% if op == '+' %}
-    vpaddq ymm2, ymm0, ymm1
-    {% elif op == '-' %}
-    vpsubq ymm2, ymm0, ymm1
-    {% elif op == '*' %}
-    vpmullq ymm2, ymm0, ymm1
-    {% endif %}
+    inc rbx
+    jmp input_loop
 
-    vmovdqu ymm3, c[rip]
+compute:
+    
+    vmovups ymm0, [rip + array1]  
+    vmovups ymm1, [rip + array2]  
 
-    vpcmpeqq ymm4, ymm2, ymm3
-    vpmovmskb eax, ymm4
-    cmp eax, 0FFFFFFFFh
-    sete al
-    movzx rdi, al
+    {{ op_asm }} ymm2, ymm0, ymm1  
 
-    call writei64
-    call nl
-    call finish
+    vmovups [rip + result], ymm2    
 
-read_array:
-    push rbp
-    mov rbp, rsp
-    mov rsi, rdi
-    xor rcx, rcx
+    
+    mov rbx, 0
+    lea r12, [rip + result]
 
-.loop:
-    call readi64
-    mov [rsi + rcx*8], rax
-    inc rcx
-    cmp rcx, 4
-    jl .loop
+print_loop:
+    cmp rbx, [rip + array_size]
+    jge end_print
 
+    movss xmm0, [r12 + rbx * 4]
+    cvtss2sd xmm0, xmm0
+
+    lea rdi, [rip + output_format]
+    mov eax, 1
+    call printf
+
+    inc rbx
+    jmp print_loop
+
+end_print:
+    lea rdi, [rip + newline]
+    call puts
+
+    mov rsp, rbp
     pop rbp
+    xor eax, eax
     ret

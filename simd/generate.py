@@ -1,74 +1,52 @@
 #!/usr/bin/env python3
-
 import os
-import tarfile
 import shutil
+import tarfile
 from jinja2 import Environment, FileSystemLoader
 
-# Описание вариантов
-ops = [
-    {'id': 'A', 'op': '+', 'desc': 'выполняет поэлементное сложение двух массивов'},
-    {'id': 'B', 'op': '-', 'desc': 'выполняет поэлементное вычитание второго массива из первого'},
-    {'id': 'C', 'op': '*', 'desc': 'выполняет поэлементное умножение двух массивов'},
+# Варианты операций
+VARIANTS = [
+    {"id": "A", "op_asm": "vaddps", "desc": "Сложение"},
+    {"id": "B", "op_asm": "vmulps", "desc": "Умножение"},
+    {"id": "C", "op_asm": "vsubps", "desc": "Вычитание"},
+    {"id": "D", "op_asm": "vdivps", "desc": "Деление"},
+    {"id": "E", "op_asm": "vmaxps", "desc": "Поиск максимума"}
 ]
 
-# Jinja2 окружение
-env = Environment(loader=FileSystemLoader('templates'))
-solution_template = env.get_template('solution.S.j2')
-statement_template = env.get_template('statement.xml.j2')
-makefile_template = env.get_template('Makefile.j2')
+env = Environment(loader=FileSystemLoader("templates"))
 
-def gen_variant(opdata):
-    vid = opdata['id']
-    vdir = f'variants/{vid}'
-    sdir = f'{vdir}/solution'
-    tdir = f'{vdir}/tests'
+def generate_variant(variant):
+    variant_dir = f"variants/{variant['id']}"
+    solution_dir = f"{variant_dir}/solution"
+    os.makedirs(solution_dir, exist_ok=True)
 
-    os.makedirs(sdir, exist_ok=True)
-    os.makedirs(tdir, exist_ok=True)
+    # Рендерим solution.S
+    template_solution = env.get_template("solution.S.j2")
+    with open(f"{solution_dir}/solution.S", "w") as f:
+        f.write(template_solution.render(**variant))
 
-    # Создание statement.xml
-    with open(f'{vdir}/statement.xml', 'w') as f:
-        f.write(statement_template.render(id=vid, op=opdata['op'], desc=opdata['desc']))
+    # Рендерим statement.xml в папке варианта (не в solution/)
+    template_statement = env.get_template("statement.xml.j2")
+    with open(f"{variant_dir}/statement.xml", "w") as f:
+        f.write(template_statement.render(**variant))
 
-    # Создание solution.S
-    with open(f'{sdir}/solution.S', 'w') as f:
-        f.write(solution_template.render(op=opdata['op']))
-
-    # Создание Makefile
-    with open(f'{sdir}/Makefile', 'w') as f:
-        f.write(makefile_template.render())
-
-    # Пример простого набора тестов
-    a = [1, 2, 3, 4]
-    b = [5, 6, 7, 8]
-    if opdata['op'] == '+':
-        c = [x + y for x, y in zip(a, b)]
-    elif opdata['op'] == '-':
-        c = [x - y for x, y in zip(a, b)]
-    elif opdata['op'] == '*':
-        c = [x * y for x, y in zip(a, b)]
-    else:
-        c = [0, 0, 0, 0]
-
-    # Сохраняем тест
-    with open(f'{tdir}/001.dat', 'w') as f:
-        f.write(" ".join(map(str, a + b + c)))
-    with open(f'{tdir}/001.ans', 'w') as f:
-        f.write("1")
+    # Makefile
+    with open(f"{solution_dir}/Makefile", "w") as f:
+        f.write("all: solution\n\nsolution: solution.S \n\tgcc -o $@ $^ -no-pie -mavx\n")
 
     # Архив solution.tar
-    with tarfile.open(f'{vdir}/solution.tar', 'w') as tar:
-        for fname in os.listdir(sdir):
-            full_path = os.path.join(sdir, fname)
-            tar.add(full_path, arcname=os.path.join('solution', fname))
+    with tarfile.open(f"{variant_dir}/solution.tar", "w") as tar:
+        tar.add(f"{solution_dir}/solution.S", arcname="solution/solution.S")
+        tar.add(f"{solution_dir}/Makefile", arcname="solution/Makefile")
+        tar.add(f"{variant_dir}/statement.xml", arcname="solution/statement.xml")  # Добавляем statement.xml в архив под solution/
 
-if __name__ == '__main__':
-    if os.path.exists('variants'):
-        shutil.rmtree('variants')
-    os.makedirs('variants')
 
-    for opdata in ops:
-        gen_variant(opdata)
+if __name__ == "__main__":
+    if os.path.exists("variants"):
+        shutil.rmtree("variants")
+    os.makedirs("variants")
 
-    print(f'Сгенерировано {len(ops)} вариантов в папке variants/')
+    for variant in VARIANTS:
+        generate_variant(variant)
+
+    print(f"Сгенерировано {len(VARIANTS)} вариантов в папке variants/")
