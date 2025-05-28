@@ -1,0 +1,62 @@
+.intel_syntax noprefix
+.global main
+
+.data
+    .align 32
+a:  .zero 32
+b:  .zero 32
+c:  .zero 32
+
+.text
+main:
+    push rbp
+    mov rbp, rsp
+    sub rsp, 32
+
+    lea rdi, a[rip]
+    call read_array
+
+    lea rdi, b[rip]
+    call read_array
+
+    lea rdi, c[rip]
+    call read_array
+
+    vmovdqu ymm0, a[rip]
+    vmovdqu ymm1, b[rip]
+
+    {% if op == '+' %}
+    vpaddq ymm2, ymm0, ymm1
+    {% elif op == '-' %}
+    vpsubq ymm2, ymm0, ymm1
+    {% elif op == '*' %}
+    vpmullq ymm2, ymm0, ymm1
+    {% endif %}
+
+    vmovdqu ymm3, c[rip]
+
+    vpcmpeqq ymm4, ymm2, ymm3
+    vpmovmskb eax, ymm4
+    cmp eax, 0FFFFFFFFh
+    sete al
+    movzx rdi, al
+
+    call writei64
+    call nl
+    call finish
+
+read_array:
+    push rbp
+    mov rbp, rsp
+    mov rsi, rdi
+    xor rcx, rcx
+
+.loop:
+    call readi64
+    mov [rsi + rcx*8], rax
+    inc rcx
+    cmp rcx, 4
+    jl .loop
+
+    pop rbp
+    ret

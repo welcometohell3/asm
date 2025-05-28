@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<problem
+  package="ru.ejudge.auto_simd{{ id }}"
+  id="{{ id }}"
+  type="standard">
+  <keywords>SIMD, AVX</keywords>
+  <statement language="ru_RU">
+    <title>SIMD операция (Вариант {{ id }})</title>
+    <description>
+      <p>Напишите программу на ассемблере x86-64 с использованием AVX, которая {{ desc }}.</p>
+      <p>Заданы три массива по 4 64-битных целых числа: <code>a</code>, <code>b</code> и <code>c</code>.</p>
+      <p>Проверьте, совпадает ли результат поэлементной операции <code>{{ op }}</code> над <code>a</code> и <code>b</code> с массивом <code>c</code>. Выведите <code>1</code>, если совпадает, иначе <code>0</code>.</p>
+    </description>
+    <input_format>
+      <p>Программа читает 12 чисел: сначала массив <code>a</code> (4 числа), затем <code>b</code> (4 числа), затем <code>c</code> (4 числа).</p>
+    </input_format>
+    <output_format>
+      <p>Выводится одно число: <code>1</code> или <code>0</code>.</p>
+    </output_format>
+    <notes>
+      <p>Используйте инструкции AVX: <code>vmovdqu</code>, <code>vpaddq</code>, <code>vpsubq</code>, <code>vpmullq</code>, <code>vpcmpeqq</code>, <code>vpmovmskb</code> и другие при необходимости.</p>
+    </notes>
+  </statement>
+  <examples>
+    <example>
+      <input></input>
+      <output></output>
+    </example>
+  </examples>
+</problem>
